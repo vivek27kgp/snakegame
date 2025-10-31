@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 export default function ScoreBoard({ score }) {
-  const displayScore = Math.floor(score / 2);
+  const displayScore = score;
   
   return (
     <motion.div
