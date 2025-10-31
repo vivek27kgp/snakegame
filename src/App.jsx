@@ -335,20 +335,24 @@ export default function App() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        padding: "20px",
+        justifyContent: "flex-start",
+        padding: "5px",
         minHeight: "100vh",
+        maxWidth: "100vw",
+        overflow: "hidden",
+        boxSizing: "border-box",
       }}
     >
       <InstructionsButton onClick={() => setShowInstructions(true)} />
 
       <h1
         style={{
-          fontSize: "42px",
+          fontSize: "clamp(20px, 5vw, 42px)",
           fontWeight: "bold",
           color: "var(--color-secondary)",
-          marginBottom: "5px",
+          marginBottom: "2px",
           textShadow: "2px 2px 8px rgba(0,0,0,0.8)",
+          textAlign: "center",
         }}
       >
         TATA ETHICS GAME
@@ -356,11 +360,12 @@ export default function App() {
 
       <h2
         style={{
-          fontSize: "42px",
+          fontSize: "clamp(16px, 4vw, 32px)",
           fontWeight: "bold",
           color: "var(--color-secondary)",
-          marginBottom: "10px",
+          marginBottom: "5px",
           textShadow: "2px 2px 8px rgba(0,0,0,0.8)",
+          textAlign: "center",
         }}
       >
         🐍 Snake Game

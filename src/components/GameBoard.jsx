@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 // Snake Component with enhanced appearance
-const Snake = ({ snake, direction }) => {
+const Snake = ({ snake, direction, cellSize }) => {
   const getRotation = () => {
     if (direction.x === 1) return 0;  // RIGHT
     if (direction.y === 1) return 90; // DOWN
@@ -32,10 +32,10 @@ const Snake = ({ snake, direction }) => {
             }}
             style={{
               position: 'absolute',
-              left: `${segment.x * 20}px`,
-              top: `${segment.y * 20}px`,
-              width: '20px',
-              height: '20px',
+              left: `${segment.x * cellSize}px`,
+              top: `${segment.y * cellSize}px`,
+              width: `${cellSize}px`,
+              height: `${cellSize}px`,
               background: isHead 
                 ? 'radial-gradient(circle at 30% 30%, var(--color-snake-head), var(--color-snake-bright))'
                 : `linear-gradient(135deg, var(--color-snake-bright), var(--color-snake-dark))`,
@@ -82,7 +82,7 @@ const Snake = ({ snake, direction }) => {
 };
 
 // Fruit Component
-const Fruit = ({ position }) => {
+const Fruit = ({ position, cellSize }) => {
   if (!position) return null;
   
   const getFruitEmoji = () => {
@@ -112,10 +112,10 @@ const Fruit = ({ position }) => {
       }}
       style={{
         position: 'absolute',
-        left: `${position.x * 20}px`,
-        top: `${position.y * 20}px`,
-        width: '20px',
-        height: '20px',
+        left: `${position.x * cellSize}px`,
+        top: `${position.y * cellSize}px`,
+        width: `${cellSize}px`,
+        height: `${cellSize}px`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -130,11 +130,16 @@ const Fruit = ({ position }) => {
 };
 
 export default function GameBoard({ snake, fruit, gridSize, cellSize, direction }) {
+  const maxWidth = window.innerWidth - 20;
+  const maxHeight = window.innerHeight - 300;
+  const boardSize = Math.min(maxWidth, maxHeight, 400);
+  const actualCellSize = boardSize / gridSize;
+  
   return (
     <div style={{
       position: 'relative',
-      width: `${gridSize * cellSize}px`,
-      height: `${gridSize * cellSize}px`,
+      width: `${boardSize}px`,
+      height: `${boardSize}px`,
       backgroundColor: 'var(--color-dark-bg)',
       border: '3px solid var(--color-secondary)',
       borderRadius: '15px',
@@ -143,11 +148,11 @@ export default function GameBoard({ snake, fruit, gridSize, cellSize, direction 
         linear-gradient(var(--color-grid-line) 1px, transparent 1px),
         linear-gradient(90deg, var(--color-grid-line) 1px, transparent 1px)
       `,
-      backgroundSize: `${cellSize}px ${cellSize}px`,
+      backgroundSize: `${actualCellSize}px ${actualCellSize}px`,
       overflow: 'hidden'
     }}>
-      <Snake snake={snake} direction={direction} />
-      <Fruit position={fruit} />
+      <Snake snake={snake} direction={direction} cellSize={actualCellSize} />
+      <Fruit position={fruit} cellSize={actualCellSize} />
     </div>
   );
 }

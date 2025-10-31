@@ -65,7 +65,7 @@ export default function GameOverModal({ score, onRestart }) {
           fontWeight: 'bold',
           marginBottom: '30px'
         }}>
-          {Math.floor(score / 2)}
+          {score}
         </p>
         <motion.button
           whileHover={{ scale: 1.1 }}
