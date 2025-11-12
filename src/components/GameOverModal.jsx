@@ -38,19 +38,19 @@ export default function GameOverModal({ score, onRestart }) {
         }}
       >
         <motion.div
-          animate={{ rotate: [0, -10, 10, -10, 0] }}
+          animate={{ scale: [1, 1.1, 1] }}
           transition={{ duration: 0.5, repeat: 2 }}
           style={{ fontSize: '48px', marginBottom: '20px' }}
         >
-          😔
+          🎆
         </motion.div>
         <h2 style={{
           fontSize: '36px',
-          color: '#e74c3c',
+          color: 'var(--color-secondary)',
           marginBottom: '15px',
           fontWeight: 'bold'
         }}>
-          Game Over!
+          Well Played!
         </h2>
         <p style={{
           fontSize: '20px',
