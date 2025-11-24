@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import GameBoard from "./components/GameBoard";
 import ScoreBoard from "./components/ScoreBoard";
 import InstructionsButton from "./components/InstructionsButton";
 import InstructionsModal from "./components/InstructionsModal";
-import EthicsPopup from "./components/EthicsPopup";
+
 import GameOverModal from "./components/GameOverModal";
 import "./App.css";
 
 const GRID_SIZE = 20;
 const CELL_SIZE = 20;
 const MOVEMENT_SPEED = 150;
-const POPUP_TRIGGER_OPTIONS = [4, 5, 6];
+const VALUE_TRIGGER_OPTIONS = [2];
 
 const DIRECTIONS = {
   UP: { x: 0, y: -1 },
@@ -20,356 +20,21 @@ const DIRECTIONS = {
   RIGHT: { x: 1, y: 0 },
 };
 
-const ETHICAL_VALUES = [
-  {
-    title: "Whistleblower",
-    message:
-      "Someone who bravely exposes wrongdoing for the greater good. Courage in truth safeguards integrity in any system.",
-    icon: "📣",
-  },
-  {
-    title: "Ethics",
-    message:
-      "The foundation of right conduct. Ethics guide our decisions and shape our collective trust and humanity.",
-    icon: "⚖️",
-  },
-  {
-    title: "Integrity",
-    message:
-      "Being honest and staying true to your moral principles, even when no one is watching. Integrity earns lifelong respect.",
-    icon: "🛡️",
-  },
-  {
-    title: "Excellence",
-    message:
-      "Strive for the highest standards in everything you do. Excellence is a journey of continuous improvement and purpose.",
-    icon: "🏆",
-  },
-  {
-    title: "Pioneering",
-    message:
-      "Being the first to explore new ideas and lead innovation. True pioneers inspire others to dream and act boldly.",
-    icon: "🚀",
-  },
-  {
-    title: "Unity",
-    message:
-      "Standing together as one. Unity builds strength, fosters understanding, and creates unstoppable teams.",
-    icon: "🤝",
-  },
-  {
-    title: "Responsibility",
-    message:
-      "Owning your actions and their outcomes. Responsibility is the foundation of leadership and trust.",
-    icon: "⚖️",
-  },
-  {
-    title: "Transparency",
-    message:
-      "Communicating openly and honestly. Transparency creates clarity, prevents misunderstandings, and builds credibility.",
-    icon: "🔍",
-  },
-  {
-    title: "Respect",
-    message:
-      "Honoring the value and dignity of others. Respect transforms differences into meaningful collaboration.",
-    icon: "🙏",
-  },
-  {
-    title: "Trust",
-    message:
-      "Believing in the reliability and integrity of others. Trust is earned through consistent actions over time.",
-    icon: "🤝",
-  },
-  {
-    title: "Accountability",
-    message:
-      "Taking ownership of your words, actions, and results. Accountability strengthens credibility and teamwork.",
-    icon: "📘",
-  },
-  {
-    title: "Fairness",
-    message:
-      "Treating everyone equally and justly. Fairness ensures harmony, justice, and lasting relationships.",
-    icon: "⚖️",
-  },
-  {
-    title: "Honesty",
-    message:
-      "Always speak the truth with kindness and courage. Honesty builds the foundation of every meaningful connection.",
-    icon: "💬",
-  },
-  {
-    title: "Diversity",
-    message:
-      "Celebrating differences and learning from every perspective. Diversity makes teams stronger and ideas richer.",
-    icon: "🌎",
-  },
-  {
-    title: "Equality",
-    message:
-      "Everyone deserves equal opportunity and respect. Equality empowers people to reach their full potential.",
-    icon: "🤲",
-  },
-  {
-    title: "Meritocracy",
-    message:
-      "Rewarding effort and talent fairly. Meritocracy ensures that success comes from hard work and ability, not privilege.",
-    icon: "🎯",
-  },
-  {
-    title: "Innovation",
-    message:
-      "Turning imagination into reality. Innovation drives progress and transforms challenges into opportunities.",
-    icon: "💡",
-  },
-  {
-    title: "Sustainability",
-    message:
-      "Building a better world without harming tomorrow. Sustainability means mindful growth and conscious action.",
-    icon: "🌱",
-  },
-  {
-    title: "Confidentiality",
-    message:
-      "Protecting private information with discretion. Trust thrives when confidentiality is respected.",
-    icon: "🔒",
-  },
-  {
-    title: "Leadership",
-    message:
-      "Guiding with vision, empathy, and example. True leadership uplifts others and cultivates growth.",
-    icon: "🌟",
-  },
-  {
-    title: "Commitment",
-    message:
-      "Dedication to goals and values even when challenges arise. Commitment is the seed of accomplishment.",
-    icon: "💪",
-  },
-  {
-    title: "Courage",
-    message:
-      "Facing fear with determination. Courage is the bridge between intention and achievement.",
-    icon: "🦁",
-  },
-  {
-    title: "Empathy",
-    message:
-      "Feeling and understanding the emotions of others. Empathy fosters compassion and strong human connections.",
-    icon: "❤️",
-  },
-  {
-    title: "Collaboration",
-    message:
-      "Working together with shared purpose. Collaboration multiplies creativity and success.",
-    icon: "🤝",
-  },
-  {
-    title: "Professionalism",
-    message:
-      "Maintaining competence, respect, and accountability. Professionalism builds confidence and trust in your work.",
-    icon: "💼",
-  },
-  {
-    title: "Tolerance",
-    message:
-      "Embracing differences with patience and respect. Tolerance nurtures peace and cooperation.",
-    icon: "🕊️",
-  },
-  {
-    title: "Learning",
-    message:
-      "A lifelong journey of curiosity and discovery. Each lesson shapes a wiser version of yourself.",
-    icon: "📚",
-  },
-  {
-    title: "Empowerment",
-    message:
-      "Giving people the confidence and authority to act. Empowerment transforms potential into performance.",
-    icon: "⚡",
-  },
-  {
-    title: "Communication",
-    message:
-      "Sharing information clearly and respectfully. Effective communication builds understanding and trust.",
-    icon: "🗣️",
-  },
-  {
-    title: "Protection",
-    message:
-      "Safeguarding people, values, and truth. Protection ensures safety, dignity, and justice for all.",
-    icon: "🛡️",
-  },
-  {
-    title: "Objectivity",
-    message:
-      "Judging situations with facts, not emotions. Objectivity helps maintain fairness and sound decision-making.",
-    icon: "🎯",
-  },
-  {
-    title: "Authenticity",
-    message:
-      "Being genuine and true to yourself. Authenticity inspires confidence and connection.",
-    icon: "✨",
-  },
-  {
-    title: "Inclusivity",
-    message:
-      "Creating space for everyone to belong. Inclusivity celebrates differences and strengthens unity.",
-    icon: "🌍",
-  },
-  {
-    title: "Credibility",
-    message:
-      "Earning trust through consistency and reliability. Credibility turns promises into proven results.",
-    icon: "📜",
-  },
-  {
-    title: "Discipline",
-    message:
-      "Training yourself to stay focused and consistent. Discipline is the key to turning goals into achievements.",
-    icon: "🎯",
-  },
-  {
-    title: "Dedication",
-    message:
-      "Staying fully committed to your purpose. Dedication transforms hard work into lasting success.",
-    icon: "🔥",
-  },
-  {
-    title: "Motivation",
-    message:
-      "The inner drive that pushes you toward greatness. Motivation fuels progress and persistence.",
-    icon: "🚀",
-  },
-  {
-    title: "Clarity",
-    message:
-      "Understanding what truly matters. Clarity helps you make better decisions and stay on your path.",
-    icon: "🔦",
-  },
-  {
-    title: "Support",
-    message:
-      "Helping others grow and succeed. True support strengthens teams and builds lasting bonds.",
-    icon: "🫶",
-  },
-  {
-    title: "Recognition",
-    message:
-      "Acknowledging effort and contribution. Recognition motivates excellence and inspires gratitude.",
-    icon: "🏅",
-  },
-  {
-    title: "Resilience",
-    message:
-      "The strength to recover from challenges stronger than before. Resilience turns obstacles into growth.",
-    icon: "🌱",
-  },
-  {
-    title: "Optimism",
-    message:
-      "Believing in positive outcomes even in adversity. Optimism fuels hope and innovation.",
-    icon: "☀️",
-  },
-  {
-    title: "Growth",
-    message:
-      "Continuously improving and evolving. Growth happens when you step outside your comfort zone.",
-    icon: "🌳",
-  },
-  {
-    title: "Vision",
-    message:
-      "Seeing beyond the present to shape the future. Visionaries turn ideas into reality through belief and action.",
-    icon: "🔭",
-  },
-  {
-    title: "Strategy",
-    message:
-      "Crafting a thoughtful plan to reach your goals. A clear strategy turns dreams into achievable milestones.",
-    icon: "🗺️",
-  },
-  {
-    title: "Synergy",
-    message:
-      "The power of combined effort. Synergy makes collaboration more effective than individual action.",
-    icon: "⚙️",
-  },
-  {
-    title: "Inspiration",
-    message:
-      "The spark that ignites creativity and courage. Inspiration pushes boundaries and elevates others.",
-    icon: "💫",
-  },
-  {
-    title: "Honour",
-    message:
-      "Living with dignity, respect, and truth. Honour defines how others remember your character.",
-    icon: "🎖️",
-  },
-
-  // --- Additional curated values ---
-  {
-    title: "Kindness",
-    message:
-      "A small act of kindness can make a big difference. Compassion is contagious — spread it widely.",
-    icon: "💖",
-  },
-  {
-    title: "Mindfulness",
-    message:
-      "Be fully present in the moment. Mindfulness brings calmness, clarity, and better choices.",
-    icon: "🧘",
-  },
-  {
-    title: "Curiosity",
-    message:
-      "Keep asking questions and exploring. Curiosity is the beginning of all wisdom and discovery.",
-    icon: "🔍",
-  },
-  {
-    title: "Accountable",
-    message:
-      "Owning your results and learning from them. Accountability builds respect and growth.",
-    icon: "📗",
-  },
-  {
-    title: "Safety",
-    message:
-      "Protect yourself and others by acting responsibly. Safety ensures wellbeing and trust for all.",
-    icon: "🦺",
-  },
-  {
-    title: "Culture",
-    message:
-      "A reflection of shared beliefs and practices. A strong culture fosters belonging and pride.",
-    icon: "🎭",
-  },
-  {
-    title: "Governance",
-    message:
-      "Leading with fairness, clarity, and accountability. Good governance ensures lasting progress.",
-    icon: "🏛️",
-  },
-  {
-    title: "Prevention",
-    message:
-      "Act early to avoid harm or failure. Prevention is the best form of protection.",
-    icon: "🛑",
-  },
-  {
-    title: "Empowerment",
-    message:
-      "When people are trusted and encouraged, they grow beyond limits. Empowerment fuels innovation and joy.",
-    icon: "⚡",
-  },
+const TATA_VALUES = [
+  "INTEGRITY",
+  "PIONEERING", 
+  "EXCELLENCE",
+  "UNITY",
+  "RESPONSIBILITY",
+  "CUSTOMER FOCUS",
+  "RESPECT & INCLUSION",
+  "DIVERSITY",
+  "TRANSPARENCY"
 ];
 
-const getRandomPopupTrigger = () => {
-  return POPUP_TRIGGER_OPTIONS[
-    Math.floor(Math.random() * POPUP_TRIGGER_OPTIONS.length)
+const getRandomValueTrigger = () => {
+  return VALUE_TRIGGER_OPTIONS[
+    Math.floor(Math.random() * VALUE_TRIGGER_OPTIONS.length)
   ];
 };
 
@@ -384,11 +49,11 @@ export default function App() {
   const [score, setScore] = useState(0);
   const [gameState, setGameState] = useState("ready"); // ready, playing, paused, gameOver
   const [showInstructions, setShowInstructions] = useState(false);
-  const [showEthicsPopup, setShowEthicsPopup] = useState(false);
-  const [currentEthicalMessage, setCurrentEthicalMessage] = useState(null);
+  const [flyingValues, setFlyingValues] = useState([]);
+  const [valueIndex, setValueIndex] = useState(0);
   const [fruitsEaten, setFruitsEaten] = useState(0);
-  const [fruitsUntilPopup, setFruitsUntilPopup] = useState(
-    getRandomPopupTrigger()
+  const [fruitsUntilValue, setFruitsUntilValue] = useState(
+    getRandomValueTrigger()
   );
   const [touchStart, setTouchStart] = useState(null);
 
@@ -600,17 +265,28 @@ export default function App() {
           // Generate new fruit
           setFruit(generateFruit(newSnake));
 
-          // Check if popup should be triggered based on fruits eaten count
-          if (newFruitsEaten >= fruitsUntilPopup) {
-            // Trigger popup
-            const randomMessage =
-              ETHICAL_VALUES[Math.floor(Math.random() * ETHICAL_VALUES.length)];
-            setCurrentEthicalMessage(randomMessage);
-            setShowEthicsPopup(true);
-            setGameState("paused");
-            // Reset counter and set new random interval
+          // Check if flying value should be triggered
+          if (newFruitsEaten >= fruitsUntilValue) {
+            // Create flying value animation from current fruit position
+            const currentValue = TATA_VALUES[valueIndex % TATA_VALUES.length];
+            const flyingValueId = Date.now();
+            
+            setFlyingValues(prev => [...prev, {
+              id: flyingValueId,
+              text: currentValue,
+              x: newHead.x,
+              y: newHead.y
+            }]);
+            
+            // Remove flying value after animation
+            setTimeout(() => {
+              setFlyingValues(prev => prev.filter(v => v.id !== flyingValueId));
+            }, 2000);
+            
+            // Reset counter and move to next value
             setFruitsEaten(0);
-            setFruitsUntilPopup(getRandomPopupTrigger());
+            setValueIndex(prev => prev + 1);
+            setFruitsUntilValue(getRandomValueTrigger());
           }
 
           // Snake grows (don't remove tail)
@@ -624,13 +300,9 @@ export default function App() {
     }, MOVEMENT_SPEED);
 
     return () => clearInterval(gameInterval);
-  }, [gameState, fruit, fruitsUntilPopup, generateFruit, fruitsEaten]);
+  }, [gameState, fruit, fruitsUntilValue, generateFruit, fruitsEaten, valueIndex]);
 
-  // Handle ethics popup continue
-  const handleContinue = () => {
-    setShowEthicsPopup(false);
-    setGameState("playing");
-  };
+
 
   // Handle game restart
   const handleRestart = () => {
@@ -645,7 +317,9 @@ export default function App() {
     setScore(0);
     setFruitsEaten(0);
     setGameState("ready");
-    setFruitsUntilPopup(getRandomPopupTrigger());
+    setFruitsUntilValue(getRandomValueTrigger());
+    setFlyingValues([]);
+    setValueIndex(0);
   };
 
   return (
@@ -664,28 +338,84 @@ export default function App() {
     >
       <InstructionsButton onClick={() => setShowInstructions(true)} />
 
-      <h1
-        style={{
-          fontSize: "clamp(24px, 6vw, 42px)",
-          fontWeight: "bold",
-          color: "var(--color-secondary)",
-          marginBottom: "10px",
-          textShadow: "2px 2px 8px rgba(0,0,0,0.8)",
-          textAlign: "center",
-        }}
-      >
-        🐍 Snake Game
-      </h1>
+      <div style={{ textAlign: "center", marginBottom: "10px" }}>
+        <h1
+          style={{
+            fontSize: "clamp(24px, 6vw, 42px)",
+            fontWeight: "bold",
+            color: "var(--color-secondary)",
+            marginBottom: "5px",
+            textShadow: "2px 2px 8px rgba(0,0,0,0.8)",
+          }}
+        >
+          🍎 Value Hunt
+        </h1>
+        <p
+          style={{
+            fontSize: "clamp(12px, 3vw, 16px)",
+            color: "var(--color-text-light)",
+            opacity: 0.8,
+            fontStyle: "italic"
+          }}
+        >
+          Grab More Apples. Uncover More Values
+        </p>
+      </div>
 
       <ScoreBoard score={score} />
 
-      <GameBoard
-        snake={snake}
-        fruit={fruit}
-        gridSize={GRID_SIZE}
-        cellSize={CELL_SIZE}
-        direction={direction}
-      />
+      <div style={{ position: "relative", overflow: "visible" }}>
+        <GameBoard
+          snake={snake}
+          fruit={fruit}
+          gridSize={GRID_SIZE}
+          cellSize={CELL_SIZE}
+          direction={direction}
+        />
+        
+        {flyingValues.map(value => {
+          const maxWidth = window.innerWidth - 20;
+          const maxHeight = window.innerHeight - 300;
+          const boardSize = Math.min(maxWidth, maxHeight, 400);
+          const actualCellSize = boardSize / GRID_SIZE;
+          
+          return (
+            <motion.div
+              key={value.id}
+              initial={{ 
+                left: value.x * actualCellSize,
+                top: value.y * actualCellSize,
+                opacity: 1,
+                scale: 0.8
+              }}
+              animate={{ 
+                top: value.y * actualCellSize - 60,
+                opacity: 0,
+                scale: 1
+              }}
+              transition={{ 
+                duration: 2,
+                ease: "easeOut"
+              }}
+              style={{
+                position: "absolute",
+                pointerEvents: "none",
+                zIndex: 100,
+                background: "rgba(76, 175, 80, 0.15)",
+                color: "var(--color-secondary)",
+                padding: "4px 8px",
+                borderRadius: "8px",
+                fontSize: "12px",
+                fontWeight: "600",
+                border: "1px solid rgba(76, 175, 80, 0.3)",
+                backdropFilter: "blur(4px)"
+              }}
+            >
+              {value.text}
+            </motion.div>
+          );
+        })}
+      </div>
 
       {gameState === "ready" && (
         <div
@@ -708,14 +438,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {showEthicsPopup && currentEthicalMessage && (
-          <EthicsPopup
-            message={currentEthicalMessage}
-            onContinue={handleContinue}
-          />
-        )}
-      </AnimatePresence>
+
 
       <AnimatePresence>
         {gameState === "gameOver" && (
